@@ -34,6 +34,89 @@ PATCH_VBMETA_FLAG=auto;
 # import functions/variables and setup patching - see for reference (DO NOT REMOVE)
 . tools/ak3-core.sh;
 
+ui_print " "
+ui_print "Swipe up the screen or press any volume key first"
+
+# Keycheck
+INSTALLER=$(pwd)
+KEYCHECK=$INSTALLER/tools/keycheck
+chmod 755 $KEYCHECK
+
+keytest() {
+    (/system/bin/getevent -lc 1 2>&1 | /system/bin/grep VOLUME | /system/bin/grep " DOWN" > $INSTALLER/events) || return 1
+    return 0
+}
+
+choose() {
+    # note from chainfire @xda-developers: getevent behaves weird when piped, and busybox grep likes that even less than toolbox/toybox grep
+    while true; do
+        /system/bin/getevent -lc 1 2>&1 | /system/bin/grep VOLUME | /system/bin/grep " DOWN" > $INSTALLER/events
+        if (`cat $INSTALLER/events 2>/dev/null | /system/bin/grep VOLUME >/dev/null`); then
+            break
+        fi
+    done
+
+    if (`cat $INSTALLER/events 2>/dev/null | /system/bin/grep VOLUMEUP >/dev/null`); then
+        return 0
+    else
+        return 1
+    fi
+}
+
+chooseold() {
+    # Calling it first time detects previous input. Calling it second time will do what we want
+    $KEYCHECK
+    $KEYCHECK
+    SEL=$?
+    if [ "$1" == "UP" ]; then
+        UP=$SEL
+    elif [ "$1" == "DOWN" ]; then
+        DOWN=$SEL
+    elif [ $SEL -eq $UP ]; then
+        return 0
+    elif [ $SEL -eq $DOWN ]; then
+        return 1
+    else
+        ui_print "Vol key not detected!"
+        abort "Use name change method in TWRP"
+    fi
+}
+
+if [ -z $NEW ]; then
+    if keytest; then
+        FUNCTION=choose
+    else
+        FUNCTION=chooseold
+        ui_print " "
+        ui_print "- Vol Key Programming -"
+        ui_print "Press Volume Up Key: "
+        $FUNCTION "UP"
+        ui_print "Press Volume Down Key: "
+        $FUNCTION "DOWN"
+    fi
+
+    ui_print " "
+    ui_print "Select physical dimension options: "
+    ui_print "+ Volume Up = OSS/AOSP using 69 x 154"
+    ui_print "- Volume Down = MIUI using 695 x 1546"
+
+    if $FUNCTION; then
+        NEW=true
+    else
+        NEW=false
+    fi
+else
+    ui_print "Option specified in zipname!"
+fi
+
+if $NEW; then
+    cd dtbo/oss
+    mv dtbo.img ../../dtbo.img
+else
+    cd dtbo/miui
+    mv dtbo.img ../../dtbo.img
+fi
+
 # boot install
 dump_boot; # use split_boot to skip ramdisk unpack, e.g. for devices with init_boot ramdisk
 
