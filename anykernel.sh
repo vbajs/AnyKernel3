@@ -102,19 +102,38 @@ if [ -z $NEW ]; then
 
     if $FUNCTION; then
         NEW=true
+	ui_print " "
+	ui_print "OSS/AOSP dimensions selected."
+	ui_print "Is this a AOSP ROM Compiled with Pulkit's tree?"
+	ui_print "If unsure, select 'No'"
+	ui_print "+ Volume Up = Yes, - Volume Down = No"
+	FUNCTION=choose
+	if $FUNCTION; then
+		PULKIT=true
+	else
+		PULKIT=false
+	fi
     else
         NEW=false
+	ui_print " "
+	ui_print "MIUI dimensions seletced."
     fi
 else
     ui_print "Option specified in zipname!"
 fi
 
 if $NEW; then
-    cd dtbo/oss
-    mv dtbo.img ../../dtbo.img
+	if $PULKIT; then
+		cd pulkit
+		mv dtb.img ../dtb.img
+		mv dtbo.img ../dtbo.img
+	else
+		cd dtbo/oss
+		mv dtbo.img ../../dtbo.img
+	fi
 else
-    cd dtbo/miui
-    mv dtbo.img ../../dtbo.img
+	cd dtbo/miui
+	mv dtbo.img ../../dtbo.img
 fi
 
 # boot install
