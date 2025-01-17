@@ -4,7 +4,7 @@
 ### AnyKernel setup
 # global properties
 properties() { '
-kernel.string=STRIX Kernel by fiqri19102002 @ github
+kernel.string=Maintainership continuation by vbajs @ github
 do.devicecheck=1
 do.modules=0
 do.systemless=1
