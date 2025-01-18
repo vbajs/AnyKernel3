@@ -17,26 +17,6 @@ supported.patchlevels=
 supported.vendorpatchlevels=
 '; } # end properties
 
-
-### AnyKernel install
-## boot files attributes
-boot_attributes() {
-set_perm_recursive 0 0 755 644 $RAMDISK/*;
-set_perm_recursive 0 0 750 750 $RAMDISK/init* $RAMDISK/sbin;
-} # end attributes
-
-# boot shell variables
-BLOCK=/dev/block/bootdevice/by-name/boot;
-IS_SLOT_DEVICE=0;
-RAMDISK_COMPRESSION=auto;
-PATCH_VBMETA_FLAG=auto;
-
-# import functions/variables and setup patching - see for reference (DO NOT REMOVE)
-. tools/ak3-core.sh;
-
-ui_print " "
-ui_print "Swipe up the screen or press any volume key first"
-
 # Keycheck
 INSTALLER=$(pwd)
 KEYCHECK=$INSTALLER/tools/keycheck
@@ -63,58 +43,58 @@ choose() {
     fi
 }
 
-chooseold() {
-    # Calling it first time detects previous input. Calling it second time will do what we want
-    $KEYCHECK
-    $KEYCHECK
-    SEL=$?
-    if [ "$1" == "UP" ]; then
-        UP=$SEL
-    elif [ "$1" == "DOWN" ]; then
-        DOWN=$SEL
-    elif [ $SEL -eq $UP ]; then
-        return 0
-    elif [ $SEL -eq $DOWN ]; then
-        return 1
-    else
-        ui_print "Vol key not detected!"
-        abort "Use name change method in TWRP"
-    fi
-}
+### AnyKernel install
+## boot files attributes
+boot_attributes() {
+set_perm_recursive 0 0 755 644 $RAMDISK/*;
+set_perm_recursive 0 0 750 750 $RAMDISK/init* $RAMDISK/sbin;
+} # end attributes
 
-if [ -z $NEW ]; then
-    if keytest; then
-        FUNCTION=choose
-    else
-        FUNCTION=chooseold
-        ui_print " "
-        ui_print "- Vol Key Programming -"
-        ui_print "Press Volume Up Key: "
-        $FUNCTION "UP"
-        ui_print "Press Volume Down Key: "
-        $FUNCTION "DOWN"
-    fi
+# boot shell variables
+BLOCK=/dev/block/bootdevice/by-name/boot;
+IS_SLOT_DEVICE=0;
+RAMDISK_COMPRESSION=auto;
+PATCH_VBMETA_FLAG=auto;
 
-    ui_print " "
-    ui_print "Select physical dimension options: "
-    ui_print "+ Volume Up = OSS/AOSP using 69 x 154"
-    ui_print "- Volume Down = MIUI using 695 x 1546"
+# import functions/variables and setup patching - see for reference (DO NOT REMOVE)
+. tools/ak3-core.sh;
 
-    if $FUNCTION; then
-        NEW=true
-    else
-        NEW=false
-    fi
-else
-    ui_print "Option specified in zipname!"
+if [ -z $DTBO ]; then
+	FUNCTION=choose
+	ui_print "Select physical dimension options: "
+	ui_print "+ Volume Up = AOSP using 69 x 154"
+	ui_print "- Volume Down = MIUI using 695 x 1546"
+	if $FUNCTION; then
+		DTBO=true
+		ui_print "AOSP dimensions selected."
+		ui_print "Is this an AOSP ROM compiled with Pulkit's trees?"
+		ui_print "If unsure, select No."
+		ui_print "+ Vol Up = Yes, - Vol Down = No"
+		FUNCTION=choose
+		if $FUNCTION; then
+			PULKIT=true
+			ui_print "Using alternative dtbo for Pulkit tree"
+		else
+			PULKIT=false
+			ui_print "Using default AOSP dtbo"
+		fi
+	else
+		DTBO=false
+		ui_print "MIUI dimensions selected."
+	fi
 fi
 
-if $NEW; then
-    cd dtbo/oss
-    mv dtbo.img ../../dtbo.img
+if $DTBO; then
+	if $PULKIT; then
+		cd dtbo/pulkit
+		mv dtbo.img ../../dtbo.img
+	else
+		cd dtbo/oss
+		mv dtbo.img ../../dtbo.img
+	fi
 else
-    cd dtbo/miui
-    mv dtbo.img ../../dtbo.img
+	cd dtbo/miui
+	mv dtbo.img ../../dtbo.img
 fi
 
 # boot install
