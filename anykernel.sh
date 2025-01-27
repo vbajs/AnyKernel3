@@ -22,10 +22,6 @@ INSTALLER=$(pwd)
 KEYCHECK=$INSTALLER/tools/keycheck
 chmod 755 $KEYCHECK
 
-keytest() {
-    (/system/bin/getevent -lc 1 2>&1 | /system/bin/grep VOLUME | /system/bin/grep " DOWN" > $INSTALLER/events) || return 1
-    return 0
-}
 
 choose() {
     # note from chainfire @xda-developers: getevent behaves weird when piped, and busybox grep likes that even less than toolbox/toybox grep
