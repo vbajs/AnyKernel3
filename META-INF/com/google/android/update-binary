@@ -564,6 +564,14 @@ do_bootchoose() {
     fi
 }
 
+nsu_for_magisk() {
+	ui_print "Magisk found! Forcing NSU selection.."
+	ui_print "It is not recommended to have both KSU and Magisk at the same time!!"
+	ui_print "If you want KSU, please uninstall Magisk completely, and then reflash kernel zip."
+	mv -f $AKHOME/boot/nsu/Image.gz $AKHOME/Image.gz
+	ui_print " "
+}
+
 show_progress 1.34 25;
 ui_print " ";
 cleanup;
@@ -604,9 +612,12 @@ do_vendorlevelcheck;
 
 ui_print "Installing...";
 ui_print " ";
-ui_print "Swipe up the screen or press any volume key first";
 
-do_bootchoose;
+if [ -f /data/adb/magisk/magisk ]; then
+	nsu_for_magisk;
+else	
+	do_bootchoose;
+fi
 
 # hack to maintain support for anykernel.sh files that weren't updated correctly along with the AK core
 CORE=$(grep -oE 'ak.*core.sh' anykernel.sh);
