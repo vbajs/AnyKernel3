@@ -57,39 +57,23 @@ PATCH_VBMETA_FLAG=auto;
 
 if [ -z $DTBO ]; then
 	FUNCTION=choose
-	ui_print "Select physical dimension options: "
-	ui_print "+ Volume Up = AOSP using 69 x 154"
-	ui_print "- Volume Down = MIUI using 695 x 1546"
+	ui_print "Is this an AOSP ROM compiled with Pulkit's trees?"
+	ui_print "If unsure, select No."
+	ui_print "+ Vol Up = Yes, - Vol Down = No"
 	if $FUNCTION; then
 		DTBO=true
-		ui_print "AOSP dimensions selected."
-		ui_print "Is this an AOSP ROM compiled with Pulkit's trees?"
-		ui_print "If unsure, select No."
-		ui_print "+ Vol Up = Yes, - Vol Down = No"
-		FUNCTION=choose
-		if $FUNCTION; then
-			PULKIT=true
-			ui_print "Using alternative dtbo for Pulkit tree"
-		else
-			PULKIT=false
-			ui_print "Using default AOSP dtbo"
-		fi
+		ui_print "Using alternative dtbo for Pulkit tree"
 	else
 		DTBO=false
-		ui_print "MIUI dimensions selected."
+		ui_print "Using default AOSP dtbo"
 	fi
 fi
 
 if $DTBO; then
-	if $PULKIT; then
-		cd dtbo/pulkit
-		mv dtbo.img ../../dtbo.img
-	else
-		cd dtbo/oss
-		mv dtbo.img ../../dtbo.img
-	fi
+	cd dtbo/pulkit
+	mv dtbo.img ../../dtbo.img
 else
-	cd dtbo/miui
+	cd dtbo/oss
 	mv dtbo.img ../../dtbo.img
 fi
 
