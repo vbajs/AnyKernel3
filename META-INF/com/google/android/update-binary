@@ -544,7 +544,7 @@ do_bootchoose() {
     if [ -z "$SU" ]; then
         FUNCTION=choose
         ui_print "Select Rooting Solution:"
-        ui_print "+ Volume Up = KernelSU-Next"
+        ui_print "+ Volume Up = KernelSU"
         ui_print "- Volume Down = None."
         if $FUNCTION; then
             SU=true
