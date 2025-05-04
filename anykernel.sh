@@ -4,7 +4,7 @@
 ### AnyKernel setup
 # global properties
 properties() { '
-kernel.string=Maintainership continuation by vbajs @ github
+kernel.string=ReSTRIX kernel for MIUI by vbajs @ github
 do.devicecheck=1
 do.modules=0
 do.systemless=1
